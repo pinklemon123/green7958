@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>发布文章 - 青蓝论坛</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="publish">
+    <header class="global-header">
+      <button id="menuButton" class="menu-button" type="button" aria-label="打开菜单" aria-expanded="false">
+        <span></span>
+        <span></span>
+      </button>
+      <a class="brand" href="index.html" aria-label="青蓝存在主义论坛首页">
+        <span class="brand-mark">存</span>
+        <span>
+          <strong>青蓝论坛</strong>
+          <small>发布文章</small>
+        </span>
+      </a>
+      <div class="header-actions">
+        <a class="primary-button" href="profile.html">个人中心</a>
+      </div>
+    </header>
+
+    <div id="menuOverlay" class="menu-overlay" hidden></div>
+    <aside id="siteMenu" class="site-menu" aria-label="站点菜单" aria-hidden="true">
+      <div class="menu-panel-head">
+        <span>导航</span>
+        <button id="closeMenu" class="icon-button" type="button" aria-label="关闭菜单">×</button>
+      </div>
+      <nav class="menu-nav">
+        <a href="index.html">主页</a>
+        <a href="discussion.html">讨论广场</a>
+        <a href="research.html">研究札记</a>
+        <a href="articles.html">日常文章</a>
+        <a href="translation.html">翻译计划</a>
+        <a href="profile.html">个人中心</a>
+        <a href="publish.html">发布文章</a>
+        <a href="login.html">匿名登录</a>
+      </nav>
+      <div class="menu-tools">
+        <span>界面模式</span>
+        <div class="theme-switch" role="group" aria-label="界面模式">
+          <button type="button" data-theme-choice="light">白天</button>
+          <button type="button" data-theme-choice="dark">黑夜</button>
+        </div>
+        <a id="loginMenuButton" class="menu-login-button" href="login.html">匿名登录</a>
+        <p id="userStatus" class="user-status">未登录</p>
+      </div>
+    </aside>
+
+    <main>
+      <section class="page-hero">
+        <p class="eyebrow">Editor</p>
+        <h1>发布文章</h1>
+        <p>登录后可发布到讨论、研究、日常文章或翻译计划。支持封面图、正文和 5MB 以下附件。</p>
+      </section>
+
+      <section class="content-section editor-shell">
+        <div id="publishGate" class="empty-state"></div>
+        <form id="publishForm" class="editor-form">
+          <div class="form-grid">
+            <label>
+              标题
+              <input name="title" type="text" required placeholder="例如：自由选择为什么总伴随焦虑？" />
+            </label>
+            <label>
+              分区
+              <select name="category" required>
+                <option value="discussion">讨论广场</option>
+                <option value="research">研究札记</option>
+                <option value="daily">日常文章</option>
+                <option value="translation">翻译计划</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            摘要
+            <textarea name="excerpt" rows="3" required placeholder="列表页显示的摘要"></textarea>
+          </label>
+          <label>
+            正文
+            <textarea name="content" rows="12" required placeholder="支持纯文本段落，后续可替换为富文本编辑器"></textarea>
+          </label>
+          <div class="form-grid">
+            <label>
+              封面图片
+              <input id="coverInput" name="cover" type="file" accept="image/*" />
+            </label>
+            <label>
+              附件
+              <input id="attachmentInput" name="attachment" type="file" />
+            </label>
+          </div>
+          <p id="fileNotice" class="form-note">图片和附件单个文件必须小于 5MB。</p>
+          <div id="coverPreview" class="cover-preview" hidden></div>
+          <div class="composer-actions">
+            <button class="primary-button" type="submit">发布</button>
+            <a class="secondary-button" href="profile.html">返回个人中心</a>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>青蓝存在主义论坛</span>
+      <span>Publish</span>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

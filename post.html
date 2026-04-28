@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文章阅读 - 青蓝论坛</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="post">
+    <header class="global-header">
+      <button id="menuButton" class="menu-button" type="button" aria-label="打开菜单" aria-expanded="false">
+        <span></span>
+        <span></span>
+      </button>
+      <a class="brand" href="index.html" aria-label="青蓝存在主义论坛首页">
+        <span class="brand-mark">存</span>
+        <span>
+          <strong>青蓝论坛</strong>
+          <small>文章阅读</small>
+        </span>
+      </a>
+      <div class="header-actions">
+        <a class="primary-button" href="publish.html">发布文章</a>
+      </div>
+    </header>
+
+    <div id="menuOverlay" class="menu-overlay" hidden></div>
+    <aside id="siteMenu" class="site-menu" aria-label="站点菜单" aria-hidden="true">
+      <div class="menu-panel-head">
+        <span>导航</span>
+        <button id="closeMenu" class="icon-button" type="button" aria-label="关闭菜单">×</button>
+      </div>
+      <nav class="menu-nav">
+        <a href="index.html">主页</a>
+        <a href="discussion.html">讨论广场</a>
+        <a href="research.html">研究札记</a>
+        <a href="articles.html">日常文章</a>
+        <a href="translation.html">翻译计划</a>
+        <a href="profile.html">个人中心</a>
+        <a href="publish.html">发布文章</a>
+        <a href="login.html">匿名登录</a>
+      </nav>
+      <div class="menu-tools">
+        <span>界面模式</span>
+        <div class="theme-switch" role="group" aria-label="界面模式">
+          <button type="button" data-theme-choice="light">白天</button>
+          <button type="button" data-theme-choice="dark">黑夜</button>
+        </div>
+        <a id="loginMenuButton" class="menu-login-button" href="login.html">匿名登录</a>
+        <p id="userStatus" class="user-status">未登录</p>
+      </div>
+    </aside>
+
+    <main>
+      <article id="articleView" class="article-view"></article>
+      <section class="content-section article-actions">
+        <div class="reaction-bar">
+          <button id="likeButton" class="secondary-button" type="button">喜欢 <span>0</span></button>
+          <button id="dislikeButton" class="secondary-button" type="button">踩 <span>0</span></button>
+          <button id="favoriteButton" class="secondary-button" type="button">收藏</button>
+        </div>
+      </section>
+      <section class="content-section comments-section">
+        <div class="section-title slim">
+          <h2>评论</h2>
+        </div>
+        <form id="commentForm" class="comment-form">
+          <textarea name="comment" rows="4" placeholder="写下你的评论" required></textarea>
+          <button class="primary-button" type="submit">发表评论</button>
+        </form>
+        <div id="commentList" class="comment-list"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>青蓝存在主义论坛</span>
+      <span>Post</span>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
