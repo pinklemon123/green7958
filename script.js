@@ -1,13 +1,10 @@
-const data = window.siteData || { posts: [] };
+const data = window.siteData || { posts: [], galleries: {}, comments: {} };
 const page = document.body.dataset.page || "home";
 const searchInput = document.querySelector("#siteSearch");
 const menuButton = document.querySelector("#menuButton");
 const closeMenu = document.querySelector("#closeMenu");
 const siteMenu = document.querySelector("#siteMenu");
 const menuOverlay = document.querySelector("#menuOverlay");
-const composeButton = document.querySelector("#composeButton");
-const closeComposer = document.querySelector("#closeComposer");
-const composer = document.querySelector("#composer");
 const tabs = document.querySelectorAll(".tab");
 const sortSelect = document.querySelector("#sortSelect");
 const themeButtons = document.querySelectorAll("[data-theme-choice]");
@@ -16,9 +13,52 @@ const loginForm = document.querySelector("#loginForm");
 const userStatus = document.querySelector("#userStatus");
 const loginName = document.querySelector("#loginName");
 const logoutButton = document.querySelector("#logoutButton");
+const maxFileSize = 5 * 1024 * 1024;
 
 let activeFilter = "all";
 let currentUser = null;
+
+function storageGet(key, fallback) {
+  try {
+    return JSON.parse(localStorage.getItem(key)) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function storageSet(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function getAllPosts() {
+  return [...data.posts, ...storageGet("greenparty-posts", [])];
+}
+
+function getPostById(id) {
+  return getAllPosts().find((post) => post.id === id);
+}
+
+function getCategoryLabel(category) {
+  return (
+    {
+      discussion: "讨论广场",
+      research: "研究札记",
+      daily: "日常文章",
+      translation: "翻译计划",
+    }[category] || "讨论"
+  );
+}
+
+function getCategoryUrl(category) {
+  return (
+    {
+      discussion: "discussion.html",
+      research: "research.html",
+      daily: "articles.html",
+      translation: "translation.html",
+    }[category] || "discussion.html"
+  );
+}
 
 function loadTheme() {
   const savedTheme = localStorage.getItem("greenparty-theme") || "light";
@@ -37,11 +77,7 @@ function setTheme(theme) {
 }
 
 function loadUser() {
-  try {
-    currentUser = JSON.parse(localStorage.getItem("greenparty-user"));
-  } catch {
-    currentUser = null;
-  }
+  currentUser = storageGet("greenparty-user", null);
   renderUser();
 }
 
@@ -67,9 +103,9 @@ function textMatches(post, query) {
 function sortPosts(posts) {
   const value = sortSelect?.value || "hot";
   return [...posts].sort((a, b) => {
-    if (value === "new") return data.posts.indexOf(a) - data.posts.indexOf(b);
-    if (value === "deep") return b.depth - a.depth;
-    return b.replies + b.reads / 20 - (a.replies + a.reads / 20);
+    if (value === "new") return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+    if (value === "deep") return (b.depth || 0) - (a.depth || 0);
+    return (b.replies || 0) + (b.reads || 0) / 20 - ((a.replies || 0) + (a.reads || 0) / 20);
   });
 }
 
@@ -77,18 +113,18 @@ function postCard(post) {
   return `
     <article class="post-card" data-category="${post.category}">
       <div class="post-topline">
-        <span class="post-type">${post.type}</span>
-        <span class="post-meta">${post.author} · ${post.time}</span>
+        <span class="post-type">${post.type || getCategoryLabel(post.category)}</span>
+        <span class="post-meta">${post.author} · ${post.time || "刚刚"}</span>
       </div>
       <h3>${post.title}</h3>
       <p>${post.excerpt}</p>
       <div class="post-footer">
         <div class="post-stats">
-          <span>${post.replies} 回复</span>
-          <span>${post.reads} 阅读</span>
-          <span>深度 ${post.depth}</span>
+          <span>${post.replies || 0} 回复</span>
+          <span>${post.reads || 0} 阅读</span>
+          <span>${post.likes || 0} 喜欢</span>
         </div>
-        <a class="reply-link" href="discussion.html">进入讨论</a>
+        <a class="reply-link" href="post.html?id=${encodeURIComponent(post.id)}">阅读全文</a>
       </div>
     </article>
   `;
@@ -100,13 +136,13 @@ function renderPostList() {
 
   const query = searchInput?.value.trim() || "";
   const posts = sortPosts(
-    data.posts.filter((post) => {
+    getAllPosts().filter((post) => {
       const matchesFilter = activeFilter === "all" || post.category === activeFilter;
       return matchesFilter && textMatches(post, query);
     }),
   );
 
-  target.innerHTML = posts.length ? posts.map(postCard).join("") : emptyState();
+  target.innerHTML = posts.length ? posts.map(postCard).join("") : emptyState("没有找到匹配内容。");
 }
 
 function renderContentList() {
@@ -115,9 +151,9 @@ function renderContentList() {
 
   const source = target.dataset.source;
   const query = searchInput?.value.trim() || "";
-  const posts = data.posts.filter((post) => post.category === source && textMatches(post, query));
+  const posts = getAllPosts().filter((post) => post.category === source && textMatches(post, query));
 
-  target.innerHTML = posts.length ? posts.map(postCard).join("") : emptyState();
+  target.innerHTML = posts.length ? posts.map(postCard).join("") : emptyState("没有找到匹配内容。");
 }
 
 function renderHome() {
@@ -125,27 +161,28 @@ function renderHome() {
   const highlights = document.querySelector("#homeHighlights");
   if (!feature || !highlights) return;
 
-  const featured = data.posts.find((post) => post.featured) || data.posts[0];
+  const posts = getAllPosts();
+  const featured = posts.find((post) => post.featured) || posts[0];
   feature.innerHTML = `
     <span class="feature-label">本周主帖</span>
     <h2>${featured.title}</h2>
     <p>${featured.excerpt}</p>
     <div class="feature-meta">
       <span>${featured.author}</span>
-      <span>${featured.replies} 回复</span>
-      <span>${featured.reads} 阅读</span>
+      <span>${featured.replies || 0} 回复</span>
+      <span>${featured.reads || 0} 阅读</span>
     </div>
-    <a class="text-link" href="discussion.html">查看讨论</a>
+    <a class="text-link" href="post.html?id=${encodeURIComponent(featured.id)}">阅读全文</a>
   `;
 
-  highlights.innerHTML = sortPosts(data.posts)
+  highlights.innerHTML = sortPosts(posts)
     .slice(0, 3)
     .map(
       (post) => `
-        <a class="highlight-card" href="${post.category === "daily" ? "articles.html" : post.category === "translation" ? "translation.html" : "research.html"}">
-          <span>${post.type}</span>
+        <a class="highlight-card" href="post.html?id=${encodeURIComponent(post.id)}">
+          <span>${post.type || getCategoryLabel(post.category)}</span>
           <h3>${post.title}</h3>
-          <p>${post.author} · ${post.time}</p>
+          <p>${post.author} · ${post.time || "刚刚"}</p>
         </a>
       `,
     )
@@ -178,8 +215,155 @@ function renderPageGallery() {
   target.innerHTML = (data.galleries?.[key] || []).map(galleryCard).join("");
 }
 
-function emptyState() {
-  return '<div class="empty-state">没有找到匹配内容。</div>';
+function renderProfile() {
+  const profileCard = document.querySelector("#profileCard");
+  const myPosts = document.querySelector("#myPosts");
+  const favoritePosts = document.querySelector("#favoritePosts");
+  if (!profileCard || !myPosts || !favoritePosts) return;
+
+  if (!currentUser?.name) {
+    profileCard.innerHTML = `
+      <h2>未登录</h2>
+      <p>登录后可以查看自己的发布、收藏，并进入发布界面。</p>
+      <a class="primary-button" href="login.html">匿名登录</a>
+    `;
+    myPosts.innerHTML = emptyState("登录后显示你的发布。");
+    favoritePosts.innerHTML = emptyState("登录后显示你的收藏。");
+    return;
+  }
+
+  const posts = getAllPosts();
+  const localPosts = storageGet("greenparty-posts", []).filter((post) => post.author === currentUser.name);
+  const favoriteIds = storageGet("greenparty-favorites", []);
+  const favorites = posts.filter((post) => favoriteIds.includes(post.id));
+
+  profileCard.innerHTML = `
+    <span class="profile-avatar">${currentUser.name.slice(0, 1)}</span>
+    <h2>${currentUser.name}</h2>
+    <p>匿名用户 · 本地会话</p>
+    <div class="profile-stats">
+      <span>${localPosts.length} 发布</span>
+      <span>${favorites.length} 收藏</span>
+    </div>
+    <a class="primary-button" href="publish.html">发布文章</a>
+  `;
+  myPosts.innerHTML = localPosts.length ? localPosts.map(postCard).join("") : emptyState("还没有发布文章。");
+  favoritePosts.innerHTML = favorites.length ? favorites.map(postCard).join("") : emptyState("还没有收藏文章。");
+}
+
+function renderArticle() {
+  const articleView = document.querySelector("#articleView");
+  if (!articleView) return;
+
+  const id = new URLSearchParams(location.search).get("id") || data.posts[0]?.id;
+  const post = getPostById(id);
+  if (!post) {
+    articleView.innerHTML = emptyState("文章不存在。");
+    return;
+  }
+
+  const paragraphs = String(post.content || post.excerpt)
+    .split("\n")
+    .filter(Boolean)
+    .map((text) => `<p>${text}</p>`)
+    .join("");
+  articleView.innerHTML = `
+    <header class="article-header">
+      <span class="post-type">${post.type || getCategoryLabel(post.category)}</span>
+      <h1>${post.title}</h1>
+      <p>${post.author} · ${post.time || "刚刚"} · ${post.reads || 0} 阅读</p>
+    </header>
+    ${post.image ? `<img class="article-cover" src="${post.image}" alt="${post.title}" />` : ""}
+    <div class="article-body">${paragraphs}</div>
+    ${
+      post.attachments?.length
+        ? `<div class="attachment-list"><h2>附件</h2>${post.attachments
+            .map((file) => `<a href="${file.dataUrl || "#"}" download="${file.name}">${file.name} · ${file.sizeLabel}</a>`)
+            .join("")}</div>`
+        : ""
+    }
+  `;
+  renderReactions(post);
+  renderComments(post.id);
+}
+
+function renderReactions(post) {
+  const reactionStore = storageGet("greenparty-reactions", {});
+  const favoriteIds = storageGet("greenparty-favorites", []);
+  const local = reactionStore[post.id] || { likes: 0, dislikes: 0 };
+  const likeButton = document.querySelector("#likeButton");
+  const dislikeButton = document.querySelector("#dislikeButton");
+  const favoriteButton = document.querySelector("#favoriteButton");
+  if (!likeButton || !dislikeButton || !favoriteButton) return;
+  likeButton.querySelector("span").textContent = (post.likes || 0) + local.likes;
+  dislikeButton.querySelector("span").textContent = (post.dislikes || 0) + local.dislikes;
+  favoriteButton.textContent = favoriteIds.includes(post.id) ? "已收藏" : "收藏";
+
+  likeButton.onclick = () => {
+    const store = storageGet("greenparty-reactions", {});
+    store[post.id] = store[post.id] || { likes: 0, dislikes: 0 };
+    store[post.id].likes += 1;
+    storageSet("greenparty-reactions", store);
+    renderReactions(post);
+  };
+  dislikeButton.onclick = () => {
+    const store = storageGet("greenparty-reactions", {});
+    store[post.id] = store[post.id] || { likes: 0, dislikes: 0 };
+    store[post.id].dislikes += 1;
+    storageSet("greenparty-reactions", store);
+    renderReactions(post);
+  };
+  favoriteButton.onclick = () => {
+    const ids = storageGet("greenparty-favorites", []);
+    const next = ids.includes(post.id) ? ids.filter((item) => item !== post.id) : [...ids, post.id];
+    storageSet("greenparty-favorites", next);
+    renderReactions(post);
+  };
+}
+
+function renderComments(postId) {
+  const target = document.querySelector("#commentList");
+  if (!target) return;
+  const localComments = storageGet("greenparty-comments", {});
+  const comments = [...(data.comments?.[postId] || []), ...(localComments[postId] || [])];
+  target.innerHTML = comments.length
+    ? comments
+        .map(
+          (comment) => `
+            <article class="comment-card">
+              <strong>${comment.author}</strong>
+              <p>${comment.text}</p>
+              <span>${comment.time}</span>
+            </article>
+          `,
+        )
+        .join("")
+    : emptyState("还没有评论。");
+}
+
+function bindCommentForm() {
+  const form = document.querySelector("#commentForm");
+  if (!form) return;
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const id = new URLSearchParams(location.search).get("id") || data.posts[0]?.id;
+    const text = String(new FormData(form).get("comment") || "").trim();
+    if (!text) return;
+    const comments = storageGet("greenparty-comments", {});
+    comments[id] = comments[id] || [];
+    comments[id].push({
+      author: currentUser?.name || "匿名读者",
+      text,
+      time: "刚刚",
+    });
+    storageSet("greenparty-comments", comments);
+    form.reset();
+    renderComments(id);
+  });
+}
+
+function emptyState(text) {
+  return `<div class="empty-state">${text}</div>`;
 }
 
 function openMenu() {
@@ -206,6 +390,95 @@ function setActiveMenu() {
   });
 }
 
+function bindPublishForm() {
+  const form = document.querySelector("#publishForm");
+  const gate = document.querySelector("#publishGate");
+  const coverInput = document.querySelector("#coverInput");
+  const attachmentInput = document.querySelector("#attachmentInput");
+  const coverPreview = document.querySelector("#coverPreview");
+  const fileNotice = document.querySelector("#fileNotice");
+  if (!form || !gate) return;
+
+  if (!currentUser?.name) {
+    gate.innerHTML = '发布文章需要先登录。<a class="text-link" href="login.html">去匿名登录</a>';
+    form.hidden = true;
+    return;
+  }
+  gate.hidden = true;
+  form.hidden = false;
+
+  coverInput?.addEventListener("change", async () => {
+    const file = coverInput.files?.[0];
+    if (!file || !coverPreview) return;
+    if (file.size > maxFileSize) {
+      fileNotice.textContent = "封面图片超过 5MB，请重新选择。";
+      coverInput.value = "";
+      return;
+    }
+    const dataUrl = await readFileAsDataUrl(file);
+    coverPreview.hidden = false;
+    coverPreview.innerHTML = `<img src="${dataUrl}" alt="封面预览" /><span>${file.name}</span>`;
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const coverFile = coverInput?.files?.[0];
+    const attachmentFile = attachmentInput?.files?.[0];
+    if ((coverFile && coverFile.size > maxFileSize) || (attachmentFile && attachmentFile.size > maxFileSize)) {
+      fileNotice.textContent = "图片或附件超过 5MB，请重新选择。";
+      return;
+    }
+
+    const category = String(formData.get("category"));
+    const post = {
+      id: `local-${Date.now()}`,
+      title: String(formData.get("title")).trim(),
+      category,
+      type: getCategoryLabel(category),
+      author: currentUser.name,
+      time: "刚刚",
+      createdAt: new Date().toISOString(),
+      excerpt: String(formData.get("excerpt")).trim(),
+      content: String(formData.get("content")).trim(),
+      image: coverFile ? await readFileAsDataUrl(coverFile) : "",
+      attachments: attachmentFile
+        ? [
+            {
+              name: attachmentFile.name,
+              size: attachmentFile.size,
+              sizeLabel: formatFileSize(attachmentFile.size),
+              dataUrl: await readFileAsDataUrl(attachmentFile),
+            },
+          ]
+        : [],
+      replies: 0,
+      reads: 0,
+      depth: 30,
+      likes: 0,
+      dislikes: 0,
+    };
+    const posts = storageGet("greenparty-posts", []);
+    posts.unshift(post);
+    storageSet("greenparty-posts", posts);
+    window.location.href = `post.html?id=${encodeURIComponent(post.id)}`;
+  });
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function formatFileSize(size) {
+  if (size < 1024 * 1024) return `${Math.ceil(size / 1024)}KB`;
+  return `${(size / 1024 / 1024).toFixed(1)}MB`;
+}
+
 menuButton?.addEventListener("click", openMenu);
 closeMenu?.addEventListener("click", closeSiteMenu);
 menuOverlay?.addEventListener("click", closeSiteMenu);
@@ -222,26 +495,17 @@ loginForm?.addEventListener("submit", (event) => {
   const password = String(formData.get("password") || "").trim();
   if (!name || !password) return;
   currentUser = { name, createdAt: new Date().toISOString() };
-  localStorage.setItem("greenparty-user", JSON.stringify(currentUser));
+  storageSet("greenparty-user", currentUser);
   loginForm.reset();
   renderUser();
-  window.location.href = "index.html";
+  window.location.href = "profile.html";
 });
 
 logoutButton?.addEventListener("click", () => {
   localStorage.removeItem("greenparty-user");
   currentUser = null;
   renderUser();
-  if (loginName) loginName.focus();
-});
-
-composeButton?.addEventListener("click", () => {
-  composer?.classList.add("open");
-  composer?.scrollIntoView({ behavior: "smooth", block: "start" });
-});
-
-closeComposer?.addEventListener("click", () => {
-  composer?.classList.remove("open");
+  loginName?.focus();
 });
 
 tabs.forEach((tab) => {
@@ -261,19 +525,19 @@ searchInput?.addEventListener("input", () => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") {
-    closeSiteMenu();
-  }
+  if (event.key === "Escape") closeSiteMenu();
 });
 
 loadTheme();
 loadUser();
-if (page === "login") {
-  loginName?.focus();
-}
+if (page === "login") loginName?.focus();
 setActiveMenu();
 renderHome();
 renderHomeGallery();
 renderPageGallery();
 renderPostList();
 renderContentList();
+renderProfile();
+renderArticle();
+bindCommentForm();
+bindPublishForm();

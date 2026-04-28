@@ -24,7 +24,7 @@
           <span>搜索</span>
           <input id="siteSearch" type="search" placeholder="搜索帖子" />
         </label>
-        <button id="composeButton" class="primary-button" type="button">发布</button>
+        <a class="primary-button" href="publish.html">发布</a>
       </div>
     </header>
 
@@ -40,6 +40,9 @@
         <a href="research.html">研究札记</a>
         <a href="articles.html">日常文章</a>
         <a href="translation.html">翻译计划</a>
+        <a href="profile.html">个人中心</a>
+        <a href="publish.html">发布文章</a>
+        <a href="login.html">匿名登录</a>
       </nav>
       <div class="menu-tools">
         <span>界面模式</span>
@@ -61,28 +64,6 @@
 
       <section class="media-section page-media">
         <div id="pageGallery" class="image-strip" data-gallery="discussion"></div>
-      </section>
-
-      <section id="composer" class="composer">
-        <div class="composer-head">
-          <div>
-            <h2>发布帖子</h2>
-            <p>静态原型先保留入口，后续接后台提交。</p>
-          </div>
-          <button id="closeComposer" class="icon-button dark" type="button" aria-label="关闭发布框">×</button>
-        </div>
-        <div class="composer-fields">
-          <input type="text" placeholder="标题" />
-          <textarea rows="4" placeholder="写下你的问题、札记或日常片段"></textarea>
-          <div class="composer-actions">
-            <select aria-label="帖子类型">
-              <option>研究讨论</option>
-              <option>日常文章</option>
-              <option>翻译计划</option>
-            </select>
-            <button class="primary-button" type="button">保存草稿</button>
-          </div>
-        </div>
       </section>
 
       <section class="content-section">
