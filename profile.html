@@ -61,6 +61,27 @@
       <section class="content-section profile-grid">
         <aside id="profileCard" class="profile-card"></aside>
         <div class="profile-main">
+          <form id="profileForm" class="profile-editor">
+            <div class="section-title slim">
+              <h2>编辑资料</h2>
+            </div>
+            <div class="form-grid">
+              <label>
+                昵称
+                <input id="profileName" name="name" type="text" required />
+              </label>
+              <label>
+                头像
+                <input id="avatarInput" name="avatar" type="file" accept="image/*" />
+              </label>
+            </div>
+            <label>
+              简介
+              <textarea id="profileBio" name="bio" rows="4" placeholder="写一点关于你的研究兴趣、日常写作方向或阅读计划"></textarea>
+            </label>
+            <p id="profileNotice" class="form-note">头像图片小于 5MB。资料暂时保存在本地，后续可接入用户数据库。</p>
+            <button class="primary-button" type="submit">保存资料</button>
+          </form>
           <div class="section-title slim">
             <h2>我的发布</h2>
           </div>

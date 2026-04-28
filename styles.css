@@ -1021,6 +1021,7 @@ body[data-page="translation"] .media-card::before {
 }
 
 .profile-card,
+.profile-editor,
 .editor-form,
 .article-view,
 .comment-form,
@@ -1032,6 +1033,7 @@ body[data-page="translation"] .media-card::before {
 }
 
 :root[data-theme="dark"] .profile-card,
+:root[data-theme="dark"] .profile-editor,
 :root[data-theme="dark"] .editor-form,
 :root[data-theme="dark"] .article-view,
 :root[data-theme="dark"] .comment-form,
@@ -1057,9 +1059,44 @@ body[data-page="translation"] .media-card::before {
   background: linear-gradient(135deg, #e4fffa, var(--aqua));
 }
 
+.image-avatar {
+  object-fit: cover;
+}
+
 .profile-card h2 {
   margin-bottom: 0;
   font-size: 34px;
+}
+
+.profile-editor {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 34px;
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.profile-editor label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 900;
+}
+
+.profile-editor input,
+.profile-editor textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.86);
+  outline-color: var(--aqua);
+}
+
+:root[data-theme="dark"] .profile-editor input,
+:root[data-theme="dark"] .profile-editor textarea {
+  color: #e7fffb;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .profile-card p,

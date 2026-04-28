@@ -219,6 +219,9 @@ function renderProfile() {
   const profileCard = document.querySelector("#profileCard");
   const myPosts = document.querySelector("#myPosts");
   const favoritePosts = document.querySelector("#favoritePosts");
+  const profileForm = document.querySelector("#profileForm");
+  const profileName = document.querySelector("#profileName");
+  const profileBio = document.querySelector("#profileBio");
   if (!profileCard || !myPosts || !favoritePosts) return;
 
   if (!currentUser?.name) {
@@ -227,10 +230,15 @@ function renderProfile() {
       <p>登录后可以查看自己的发布、收藏，并进入发布界面。</p>
       <a class="primary-button" href="login.html">匿名登录</a>
     `;
+    if (profileForm) profileForm.hidden = true;
     myPosts.innerHTML = emptyState("登录后显示你的发布。");
     favoritePosts.innerHTML = emptyState("登录后显示你的收藏。");
     return;
   }
+
+  if (profileForm) profileForm.hidden = false;
+  if (profileName) profileName.value = currentUser.name || "";
+  if (profileBio) profileBio.value = currentUser.bio || "";
 
   const posts = getAllPosts();
   const localPosts = storageGet("greenparty-posts", []).filter((post) => post.author === currentUser.name);
@@ -238,9 +246,13 @@ function renderProfile() {
   const favorites = posts.filter((post) => favoriteIds.includes(post.id));
 
   profileCard.innerHTML = `
-    <span class="profile-avatar">${currentUser.name.slice(0, 1)}</span>
+    ${
+      currentUser.avatar
+        ? `<img class="profile-avatar image-avatar" src="${currentUser.avatar}" alt="${currentUser.name} 的头像" />`
+        : `<span class="profile-avatar">${currentUser.name.slice(0, 1)}</span>`
+    }
     <h2>${currentUser.name}</h2>
-    <p>匿名用户 · 本地会话</p>
+    <p>${currentUser.bio || "匿名用户 · 本地会话"}</p>
     <div class="profile-stats">
       <span>${localPosts.length} 发布</span>
       <span>${favorites.length} 收藏</span>
@@ -249,6 +261,41 @@ function renderProfile() {
   `;
   myPosts.innerHTML = localPosts.length ? localPosts.map(postCard).join("") : emptyState("还没有发布文章。");
   favoritePosts.innerHTML = favorites.length ? favorites.map(postCard).join("") : emptyState("还没有收藏文章。");
+}
+
+function bindProfileForm() {
+  const form = document.querySelector("#profileForm");
+  const avatarInput = document.querySelector("#avatarInput");
+  const notice = document.querySelector("#profileNotice");
+  if (!form) return;
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!currentUser?.name) return;
+    const formData = new FormData(form);
+    const nextName = String(formData.get("name") || "").trim();
+    const bio = String(formData.get("bio") || "").trim();
+    const avatarFile = avatarInput?.files?.[0];
+
+    if (!nextName) return;
+    if (avatarFile && avatarFile.size > maxFileSize) {
+      if (notice) notice.textContent = "头像图片超过 5MB，请重新选择。";
+      avatarInput.value = "";
+      return;
+    }
+
+    currentUser = {
+      ...currentUser,
+      name: nextName,
+      bio,
+      avatar: avatarFile ? await readFileAsDataUrl(avatarFile) : currentUser.avatar || "",
+      updatedAt: new Date().toISOString(),
+    };
+    storageSet("greenparty-user", currentUser);
+    if (notice) notice.textContent = "资料已保存。";
+    renderUser();
+    renderProfile();
+  });
 }
 
 function renderArticle() {
@@ -538,6 +585,7 @@ renderPageGallery();
 renderPostList();
 renderContentList();
 renderProfile();
+bindProfileForm();
 renderArticle();
 bindCommentForm();
 bindPublishForm();
