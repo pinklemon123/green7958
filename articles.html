@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>日常文章 - 青蓝论坛</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="articles">
+    <header class="global-header">
+      <button id="menuButton" class="menu-button" type="button" aria-label="打开菜单" aria-expanded="false">
+        <span></span>
+        <span></span>
+      </button>
+      <a class="brand" href="index.html" aria-label="青蓝存在主义论坛首页">
+        <span class="brand-mark">存</span>
+        <span>
+          <strong>青蓝论坛</strong>
+          <small>日常文章</small>
+        </span>
+      </a>
+      <div class="header-actions">
+        <label class="header-search">
+          <span>搜索</span>
+          <input id="siteSearch" type="search" placeholder="搜索日常文章" />
+        </label>
+        <a class="primary-button" href="discussion.html#composer">发布</a>
+      </div>
+    </header>
+
+    <div id="menuOverlay" class="menu-overlay" hidden></div>
+    <aside id="siteMenu" class="site-menu" aria-label="站点菜单" aria-hidden="true">
+      <div class="menu-panel-head">
+        <span>导航</span>
+        <button id="closeMenu" class="icon-button" type="button" aria-label="关闭菜单">×</button>
+      </div>
+      <nav class="menu-nav">
+        <a href="index.html">主页</a>
+        <a href="discussion.html">讨论广场</a>
+        <a href="research.html">研究札记</a>
+        <a href="articles.html">日常文章</a>
+        <a href="translation.html">翻译计划</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="page-hero">
+        <p class="eyebrow">Everyday Notes</p>
+        <h1>日常文章</h1>
+        <p>让生活里的经验成为思想入口，保持文章简洁、克制、可阅读。</p>
+      </section>
+
+      <section class="media-section page-media">
+        <div id="pageGallery" class="image-strip" data-gallery="articles"></div>
+      </section>
+
+      <section class="content-section">
+        <div id="contentList" class="post-list" data-source="daily"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>青蓝存在主义论坛</span>
+      <span>Articles</span>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

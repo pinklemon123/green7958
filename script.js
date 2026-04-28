@@ -1,147 +1,203 @@
-const posts = [
-  {
-    title: "自由选择为什么总伴随焦虑？",
-    category: "research",
-    type: "研究讨论",
-    author: "林砚",
-    time: "18 分钟前",
-    excerpt:
-      "从萨特的自由概念出发，讨论选择不是从选项中挑一个答案，而是把自己暴露在责任之中。",
-    replies: 24,
-    reads: 430,
-    depth: 92,
-  },
-  {
-    title: "在地铁上重读《西西弗神话》",
-    category: "daily",
-    type: "日常文章",
-    author: "许枝",
-    time: "1 小时前",
-    excerpt:
-      "今天的拥挤和延误反而让“荒诞”变得具体：不是宏大的绝望，而是每一次仍然继续的动作。",
-    replies: 18,
-    reads: 316,
-    depth: 61,
-  },
-  {
-    title: "克尔凯郭尔的信仰跳跃是否能被公共讨论？",
-    category: "reading",
-    type: "读书笔记",
-    author: "周临",
-    time: "昨天",
-    excerpt:
-      "如果信仰的核心是个体无法完全转译的激情，那么论坛中的讨论应该保留怎样的边界？",
-    replies: 31,
-    reads: 562,
-    depth: 88,
-  },
-  {
-    title: "他者的目光与办公室里的自我表演",
-    category: "daily",
-    type: "日常文章",
-    author: "阿澈",
-    time: "昨天",
-    excerpt:
-      "一次会议中的沉默，让我重新理解被观看并不只是羞耻，也可能是自我被固定成角色的瞬间。",
-    replies: 12,
-    reads: 205,
-    depth: 54,
-  },
-  {
-    title: "海德格尔的日常性可以怎样帮助文章写作？",
-    category: "research",
-    type: "研究讨论",
-    author: "闻屿",
-    time: "2 天前",
-    excerpt:
-      "把日常性理解为问题的入口，而不是低一级的经验材料，或许能改善哲学文章的语气。",
-    replies: 22,
-    reads: 389,
-    depth: 79,
-  },
-];
-
-const postList = document.querySelector("#postList");
-const tabs = document.querySelectorAll(".tab");
-const searchInput = document.querySelector("#searchInput");
-const sortSelect = document.querySelector("#sortSelect");
-const composer = document.querySelector("#composer");
+const data = window.siteData || { posts: [] };
+const page = document.body.dataset.page || "home";
+const searchInput = document.querySelector("#siteSearch");
+const menuButton = document.querySelector("#menuButton");
+const closeMenu = document.querySelector("#closeMenu");
+const siteMenu = document.querySelector("#siteMenu");
+const menuOverlay = document.querySelector("#menuOverlay");
 const composeButton = document.querySelector("#composeButton");
 const closeComposer = document.querySelector("#closeComposer");
+const composer = document.querySelector("#composer");
+const tabs = document.querySelectorAll(".tab");
+const sortSelect = document.querySelector("#sortSelect");
 
 let activeFilter = "all";
 
-function sortedPosts(items) {
-  const value = sortSelect.value;
-  return [...items].sort((a, b) => {
-    if (value === "new") {
-      return posts.indexOf(a) - posts.indexOf(b);
-    }
-    if (value === "deep") {
-      return b.depth - a.depth;
-    }
+function textMatches(post, query) {
+  if (!query) return true;
+  const text = `${post.title} ${post.type} ${post.author} ${post.excerpt}`.toLowerCase();
+  return text.includes(query.toLowerCase());
+}
+
+function sortPosts(posts) {
+  const value = sortSelect?.value || "hot";
+  return [...posts].sort((a, b) => {
+    if (value === "new") return data.posts.indexOf(a) - data.posts.indexOf(b);
+    if (value === "deep") return b.depth - a.depth;
     return b.replies + b.reads / 20 - (a.replies + a.reads / 20);
   });
 }
 
-function renderPosts() {
-  const query = searchInput.value.trim().toLowerCase();
-  const visiblePosts = sortedPosts(
-    posts.filter((post) => {
+function postCard(post) {
+  return `
+    <article class="post-card" data-category="${post.category}">
+      <div class="post-topline">
+        <span class="post-type">${post.type}</span>
+        <span class="post-meta">${post.author} · ${post.time}</span>
+      </div>
+      <h3>${post.title}</h3>
+      <p>${post.excerpt}</p>
+      <div class="post-footer">
+        <div class="post-stats">
+          <span>${post.replies} 回复</span>
+          <span>${post.reads} 阅读</span>
+          <span>深度 ${post.depth}</span>
+        </div>
+        <a class="reply-link" href="discussion.html">进入讨论</a>
+      </div>
+    </article>
+  `;
+}
+
+function renderPostList() {
+  const target = document.querySelector("#postList");
+  if (!target) return;
+
+  const query = searchInput?.value.trim() || "";
+  const posts = sortPosts(
+    data.posts.filter((post) => {
       const matchesFilter = activeFilter === "all" || post.category === activeFilter;
-      const text = `${post.title} ${post.type} ${post.author} ${post.excerpt}`.toLowerCase();
-      return matchesFilter && text.includes(query);
+      return matchesFilter && textMatches(post, query);
     }),
   );
 
-  if (!visiblePosts.length) {
-    postList.innerHTML = '<div class="empty-state">没有找到匹配的帖子。</div>';
-    return;
-  }
+  target.innerHTML = posts.length ? posts.map(postCard).join("") : emptyState();
+}
 
-  postList.innerHTML = visiblePosts
+function renderContentList() {
+  const target = document.querySelector("#contentList");
+  if (!target) return;
+
+  const source = target.dataset.source;
+  const query = searchInput?.value.trim() || "";
+  const posts = data.posts.filter((post) => post.category === source && textMatches(post, query));
+
+  target.innerHTML = posts.length ? posts.map(postCard).join("") : emptyState();
+}
+
+function renderHome() {
+  const feature = document.querySelector("#homeFeature");
+  const highlights = document.querySelector("#homeHighlights");
+  if (!feature || !highlights) return;
+
+  const featured = data.posts.find((post) => post.featured) || data.posts[0];
+  feature.innerHTML = `
+    <span class="feature-label">本周主帖</span>
+    <h2>${featured.title}</h2>
+    <p>${featured.excerpt}</p>
+    <div class="feature-meta">
+      <span>${featured.author}</span>
+      <span>${featured.replies} 回复</span>
+      <span>${featured.reads} 阅读</span>
+    </div>
+    <a class="text-link" href="discussion.html">查看讨论</a>
+  `;
+
+  highlights.innerHTML = sortPosts(data.posts)
+    .slice(0, 3)
     .map(
       (post) => `
-        <article class="post-card" data-category="${post.category}">
-          <div class="post-topline">
-            <span class="post-type">${post.type}</span>
-            <span class="post-meta">${post.author} · ${post.time}</span>
-          </div>
-          <h2>${post.title}</h2>
-          <p>${post.excerpt}</p>
-          <div class="post-footer">
-            <div class="post-stats">
-              <span>${post.replies} 回复</span>
-              <span>${post.reads} 阅读</span>
-              <span>深度 ${post.depth}</span>
-            </div>
-            <a class="reply-link" href="#">进入讨论</a>
-          </div>
-        </article>
+        <a class="highlight-card" href="${post.category === "daily" ? "articles.html" : post.category === "translation" ? "translation.html" : "research.html"}">
+          <span>${post.type}</span>
+          <h3>${post.title}</h3>
+          <p>${post.author} · ${post.time}</p>
+        </a>
       `,
     )
     .join("");
 }
+
+function galleryCard(item, index) {
+  return `
+    <article class="media-card" style="--i: ${index}">
+      <img src="${item.image}" alt="${item.title}" loading="lazy" />
+      <div class="media-glass">
+        <span>${item.label}</span>
+        <h3>${item.title}</h3>
+        <p>${item.source}</p>
+      </div>
+    </article>
+  `;
+}
+
+function renderHomeGallery() {
+  const target = document.querySelector("#homeGallery");
+  if (!target) return;
+  target.innerHTML = (data.galleries?.home || []).map(galleryCard).join("");
+}
+
+function renderPageGallery() {
+  const target = document.querySelector("#pageGallery");
+  if (!target) return;
+  const key = target.dataset.gallery || page;
+  target.innerHTML = (data.galleries?.[key] || []).map(galleryCard).join("");
+}
+
+function emptyState() {
+  return '<div class="empty-state">没有找到匹配内容。</div>';
+}
+
+function openMenu() {
+  if (!siteMenu || !menuOverlay || !menuButton) return;
+  siteMenu.classList.add("open");
+  siteMenu.setAttribute("aria-hidden", "false");
+  menuButton.setAttribute("aria-expanded", "true");
+  menuOverlay.hidden = false;
+}
+
+function closeSiteMenu() {
+  if (!siteMenu || !menuOverlay || !menuButton) return;
+  siteMenu.classList.remove("open");
+  siteMenu.setAttribute("aria-hidden", "true");
+  menuButton.setAttribute("aria-expanded", "false");
+  menuOverlay.hidden = true;
+}
+
+function setActiveMenu() {
+  const current = location.pathname.split("/").pop() || "index.html";
+  document.querySelectorAll(".menu-nav a").forEach((link) => {
+    const href = link.getAttribute("href");
+    link.classList.toggle("active", href === current);
+  });
+}
+
+menuButton?.addEventListener("click", openMenu);
+closeMenu?.addEventListener("click", closeSiteMenu);
+menuOverlay?.addEventListener("click", closeSiteMenu);
+siteMenu?.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeSiteMenu));
+
+composeButton?.addEventListener("click", () => {
+  composer?.classList.add("open");
+  composer?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+closeComposer?.addEventListener("click", () => {
+  composer?.classList.remove("open");
+});
 
 tabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     tabs.forEach((item) => item.classList.remove("active"));
     tab.classList.add("active");
     activeFilter = tab.dataset.filter;
-    renderPosts();
+    renderPostList();
   });
 });
 
-searchInput.addEventListener("input", renderPosts);
-sortSelect.addEventListener("change", renderPosts);
-
-composeButton.addEventListener("click", () => {
-  composer.classList.add("open");
-  composer.querySelector("input").focus();
+sortSelect?.addEventListener("change", renderPostList);
+searchInput?.addEventListener("input", () => {
+  renderHome();
+  renderPostList();
+  renderContentList();
 });
 
-closeComposer.addEventListener("click", () => {
-  composer.classList.remove("open");
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeSiteMenu();
 });
 
-renderPosts();
+setActiveMenu();
+renderHome();
+renderHomeGallery();
+renderPageGallery();
+renderPostList();
+renderContentList();

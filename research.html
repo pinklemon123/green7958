@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>研究札记 - 青蓝论坛</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="research">
+    <header class="global-header">
+      <button id="menuButton" class="menu-button" type="button" aria-label="打开菜单" aria-expanded="false">
+        <span></span>
+        <span></span>
+      </button>
+      <a class="brand" href="index.html" aria-label="青蓝存在主义论坛首页">
+        <span class="brand-mark">存</span>
+        <span>
+          <strong>青蓝论坛</strong>
+          <small>研究札记</small>
+        </span>
+      </a>
+      <div class="header-actions">
+        <label class="header-search">
+          <span>搜索</span>
+          <input id="siteSearch" type="search" placeholder="搜索研究札记" />
+        </label>
+        <a class="primary-button" href="discussion.html#composer">发布</a>
+      </div>
+    </header>
+
+    <div id="menuOverlay" class="menu-overlay" hidden></div>
+    <aside id="siteMenu" class="site-menu" aria-label="站点菜单" aria-hidden="true">
+      <div class="menu-panel-head">
+        <span>导航</span>
+        <button id="closeMenu" class="icon-button" type="button" aria-label="关闭菜单">×</button>
+      </div>
+      <nav class="menu-nav">
+        <a href="index.html">主页</a>
+        <a href="discussion.html">讨论广场</a>
+        <a href="research.html">研究札记</a>
+        <a href="articles.html">日常文章</a>
+        <a href="translation.html">翻译计划</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="page-hero">
+        <p class="eyebrow">Research</p>
+        <h1>研究札记</h1>
+        <p>文本细读、概念辨析和专题目录，先做清晰可维护的列表结构。</p>
+      </section>
+
+      <section class="media-section page-media">
+        <div id="pageGallery" class="image-strip" data-gallery="research"></div>
+      </section>
+
+      <section class="content-section two-column">
+        <div>
+          <div class="section-title slim">
+            <h2>最新研究</h2>
+          </div>
+          <div id="contentList" class="post-list" data-source="research"></div>
+        </div>
+        <aside class="side-stack">
+          <article class="side-panel">
+            <h3>专题索引</h3>
+            <p>自由、焦虑、他者、日常性、荒诞、死亡意识。</p>
+          </article>
+          <article class="side-panel dark">
+            <h3>管理员提示</h3>
+            <p>后续可把这里改成后台可编辑的专题、推荐顺序和置顶文章。</p>
+          </article>
+        </aside>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>青蓝存在主义论坛</span>
+      <span>Research</span>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

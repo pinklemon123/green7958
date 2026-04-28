@@ -6,145 +6,111 @@
     <title>青蓝存在主义论坛</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
-    <div class="page-shell">
-      <aside class="sidebar" aria-label="站点导航">
-        <a class="brand" href="#" aria-label="青蓝存在主义论坛首页">
-          <span class="brand-mark">存</span>
-          <span>
-            <strong>青蓝论坛</strong>
-            <small>存在主义研究</small>
-          </span>
-        </a>
+  <body data-page="home">
+    <header class="global-header">
+      <button id="menuButton" class="menu-button" type="button" aria-label="打开菜单" aria-expanded="false">
+        <span></span>
+        <span></span>
+      </button>
+      <a class="brand" href="index.html" aria-label="青蓝存在主义论坛首页">
+        <span class="brand-mark">存</span>
+        <span>
+          <strong>青蓝论坛</strong>
+          <small>存在主义研究与日常写作</small>
+        </span>
+      </a>
+      <div class="header-actions">
+        <label class="header-search">
+          <span>搜索</span>
+          <input id="siteSearch" type="search" placeholder="作者、概念、文章" />
+        </label>
+        <a class="primary-button" href="discussion.html#composer">发布</a>
+      </div>
+    </header>
 
-        <nav class="main-nav">
-          <a class="active" href="#">讨论广场</a>
-          <a href="#">研究札记</a>
-          <a href="#">日常文章</a>
-          <a href="#">读书小组</a>
-          <a href="#">翻译计划</a>
-        </nav>
+    <div id="menuOverlay" class="menu-overlay" hidden></div>
+    <aside id="siteMenu" class="site-menu" aria-label="站点菜单" aria-hidden="true">
+      <div class="menu-panel-head">
+        <span>导航</span>
+        <button id="closeMenu" class="icon-button" type="button" aria-label="关闭菜单">×</button>
+      </div>
+      <nav class="menu-nav">
+        <a href="index.html">主页</a>
+        <a href="discussion.html">讨论广场</a>
+        <a href="research.html">研究札记</a>
+        <a href="articles.html">日常文章</a>
+        <a href="translation.html">翻译计划</a>
+      </nav>
+    </aside>
 
-        <section class="quiet-panel">
-          <h2>今日主题</h2>
-          <p>荒诞、自由选择、责任与日常生活的交界。</p>
-          <button class="ghost-button" type="button">查看议题</button>
-        </section>
-      </aside>
+    <main>
+      <section class="home-hero">
+        <div class="home-copy">
+          <p class="eyebrow">Existence · Texts · Everyday Notes</p>
+          <h1>存在的问题，回到生活现场。</h1>
+          <p>
+            青蓝论坛用于整理存在主义研究、日常文章和翻译计划。现在展示的是模拟内容，
+            后续接入后端后，可以由管理员在后台维护并实时更新。
+          </p>
+        </div>
+        <article id="homeFeature" class="feature-card"></article>
+      </section>
 
-      <main class="content">
-        <header class="topbar">
+      <section class="media-section">
+        <div class="section-title">
           <div>
-            <p class="eyebrow">Existence, Texts, Everyday Notes</p>
-            <h1>讨论广场</h1>
+            <p class="eyebrow">Visual Board</p>
+            <h2>本周展示</h2>
           </div>
-          <div class="topbar-actions">
-            <label class="search-box">
-              <span>搜索</span>
-              <input id="searchInput" type="search" placeholder="查找作者、主题或关键词" />
-            </label>
-            <button id="composeButton" class="primary-button" type="button">发布</button>
-          </div>
-        </header>
+          <p>这里以后可以接入后台轮播图，管理员按热度、专题或活动直接替换。</p>
+        </div>
+        <div id="homeGallery" class="media-carousel" aria-label="本周展示图"></div>
+      </section>
 
-        <section class="overview-grid" aria-label="论坛概览">
-          <article class="metric-tile gradient-tile">
-            <span>活跃讨论</span>
-            <strong>128</strong>
-            <small>本周新增 34 个回复</small>
-          </article>
-          <article class="metric-tile">
-            <span>研究文章</span>
-            <strong>42</strong>
-            <small>萨特、加缪、克尔凯郭尔</small>
-          </article>
-          <article class="metric-tile">
-            <span>日常随笔</span>
-            <strong>76</strong>
-            <small>从生活经验进入问题</small>
-          </article>
-        </section>
+      <section class="clean-section">
+        <div class="section-title">
+          <p class="eyebrow">This Week</p>
+          <h2>本周主要内容</h2>
+        </div>
+        <div id="homeHighlights" class="highlight-grid"></div>
+      </section>
 
-        <section id="composer" class="composer" aria-label="快速发布">
-          <div class="composer-head">
-            <div>
-              <h2>写一篇新的帖子</h2>
-              <p>先留下标题和摘要，正文编辑器后续可以继续增强。</p>
-            </div>
-            <button id="closeComposer" class="icon-button" type="button" aria-label="关闭发布框">×</button>
-          </div>
-          <div class="composer-fields">
-            <input type="text" placeholder="标题，例如：自由选择为什么总伴随焦虑？" />
-            <textarea rows="4" placeholder="写下你的问题、札记或日常片段"></textarea>
-            <div class="composer-actions">
-              <select aria-label="帖子类型">
-                <option>研究讨论</option>
-                <option>日常文章</option>
-                <option>读书笔记</option>
-              </select>
-              <button class="primary-button" type="button">保存草稿</button>
-            </div>
-          </div>
-        </section>
+      <section class="clean-section compact">
+        <div class="section-title">
+          <p class="eyebrow">Channels</p>
+          <h2>进入分区</h2>
+        </div>
+        <div class="channel-grid">
+          <a class="channel-card" href="discussion.html">
+            <span>01</span>
+            <h3>讨论广场</h3>
+            <p>围绕问题、观点和回复展开讨论。</p>
+          </a>
+          <a class="channel-card" href="research.html">
+            <span>02</span>
+            <h3>研究札记</h3>
+            <p>整理文本细读、概念辨析和专题记录。</p>
+          </a>
+          <a class="channel-card" href="articles.html">
+            <span>03</span>
+            <h3>日常文章</h3>
+            <p>从生活经验进入思想问题。</p>
+          </a>
+          <a class="channel-card" href="translation.html">
+            <span>04</span>
+            <h3>翻译计划</h3>
+            <p>维护术语、译注和短文翻译。</p>
+          </a>
+        </div>
+      </section>
+    </main>
 
-        <section class="feed-layout">
-          <div class="feed-column">
-            <div class="section-toolbar">
-              <div class="tabs" role="tablist" aria-label="帖子筛选">
-                <button class="tab active" type="button" data-filter="all">全部</button>
-                <button class="tab" type="button" data-filter="research">研究</button>
-                <button class="tab" type="button" data-filter="daily">日常</button>
-                <button class="tab" type="button" data-filter="reading">读书</button>
-              </div>
-              <select id="sortSelect" aria-label="排序">
-                <option value="hot">热度</option>
-                <option value="new">最新</option>
-                <option value="deep">深度</option>
-              </select>
-            </div>
+    <footer class="site-footer">
+      <span>青蓝存在主义论坛</span>
+      <span>静态原型 · 后续接入后台数据</span>
+    </footer>
 
-            <div id="postList" class="post-list" aria-live="polite"></div>
-          </div>
-
-          <aside class="right-rail" aria-label="右侧信息">
-            <section class="visual-panel">
-              <div class="visual-grid" aria-hidden="true">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-              <h2>从问题进入文本</h2>
-              <p>把哲学研究放回真实生活：通勤、关系、工作、沉默和选择。</p>
-            </section>
-
-            <section class="side-section">
-              <h2>热门标签</h2>
-              <div class="tag-cloud">
-                <button type="button">荒诞</button>
-                <button type="button">自由</button>
-                <button type="button">焦虑</button>
-                <button type="button">他者</button>
-                <button type="button">日常性</button>
-                <button type="button">死亡意识</button>
-              </div>
-            </section>
-
-            <section class="side-section">
-              <h2>本周阅读</h2>
-              <ol class="reading-list">
-                <li><span>《存在与虚无》</span><small>第 1 章</small></li>
-                <li><span>《西西弗神话》</span><small>荒诞推理</small></li>
-                <li><span>《恐惧与战栗》</span><small>信仰跳跃</small></li>
-              </ol>
-            </section>
-          </aside>
-        </section>
-      </main>
-    </div>
-
+    <script src="data.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

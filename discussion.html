@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>讨论广场 - 青蓝论坛</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="discussion">
+    <header class="global-header">
+      <button id="menuButton" class="menu-button" type="button" aria-label="打开菜单" aria-expanded="false">
+        <span></span>
+        <span></span>
+      </button>
+      <a class="brand" href="index.html" aria-label="青蓝存在主义论坛首页">
+        <span class="brand-mark">存</span>
+        <span>
+          <strong>青蓝论坛</strong>
+          <small>讨论广场</small>
+        </span>
+      </a>
+      <div class="header-actions">
+        <label class="header-search">
+          <span>搜索</span>
+          <input id="siteSearch" type="search" placeholder="搜索帖子" />
+        </label>
+        <button id="composeButton" class="primary-button" type="button">发布</button>
+      </div>
+    </header>
+
+    <div id="menuOverlay" class="menu-overlay" hidden></div>
+    <aside id="siteMenu" class="site-menu" aria-label="站点菜单" aria-hidden="true">
+      <div class="menu-panel-head">
+        <span>导航</span>
+        <button id="closeMenu" class="icon-button" type="button" aria-label="关闭菜单">×</button>
+      </div>
+      <nav class="menu-nav">
+        <a href="index.html">主页</a>
+        <a href="discussion.html">讨论广场</a>
+        <a href="research.html">研究札记</a>
+        <a href="articles.html">日常文章</a>
+        <a href="translation.html">翻译计划</a>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="page-hero">
+        <p class="eyebrow">Forum</p>
+        <h1>讨论广场</h1>
+        <p>汇总本周热门问题、回复和待展开的讨论。</p>
+      </section>
+
+      <section class="media-section page-media">
+        <div id="pageGallery" class="image-strip" data-gallery="discussion"></div>
+      </section>
+
+      <section id="composer" class="composer">
+        <div class="composer-head">
+          <div>
+            <h2>发布帖子</h2>
+            <p>静态原型先保留入口，后续接后台提交。</p>
+          </div>
+          <button id="closeComposer" class="icon-button dark" type="button" aria-label="关闭发布框">×</button>
+        </div>
+        <div class="composer-fields">
+          <input type="text" placeholder="标题" />
+          <textarea rows="4" placeholder="写下你的问题、札记或日常片段"></textarea>
+          <div class="composer-actions">
+            <select aria-label="帖子类型">
+              <option>研究讨论</option>
+              <option>日常文章</option>
+              <option>翻译计划</option>
+            </select>
+            <button class="primary-button" type="button">保存草稿</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-section">
+        <div class="section-toolbar">
+          <div class="tabs" role="tablist" aria-label="帖子筛选">
+            <button class="tab active" type="button" data-filter="all">全部</button>
+            <button class="tab" type="button" data-filter="research">研究</button>
+            <button class="tab" type="button" data-filter="daily">日常</button>
+            <button class="tab" type="button" data-filter="translation">翻译</button>
+          </div>
+          <select id="sortSelect" aria-label="排序">
+            <option value="hot">热度</option>
+            <option value="new">最新</option>
+            <option value="deep">深度</option>
+          </select>
+        </div>
+        <div id="postList" class="post-list"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>青蓝存在主义论坛</span>
+      <span>Discussion</span>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
