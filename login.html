@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>翻译计划 - 青蓝论坛</title>
+    <title>匿名登录 - 青蓝论坛</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body data-page="translation">
+  <body data-page="login">
     <header class="global-header">
       <button id="menuButton" class="menu-button" type="button" aria-label="打开菜单" aria-expanded="false">
         <span></span>
@@ -16,15 +16,11 @@
         <span class="brand-mark">存</span>
         <span>
           <strong>青蓝论坛</strong>
-          <small>翻译计划</small>
+          <small>匿名登录</small>
         </span>
       </a>
       <div class="header-actions">
-        <label class="header-search">
-          <span>搜索</span>
-          <input id="siteSearch" type="search" placeholder="搜索术语或译注" />
-        </label>
-        <a class="primary-button" href="discussion.html#composer">发布</a>
+        <a class="primary-button" href="index.html">返回主页</a>
       </div>
     </header>
 
@@ -40,6 +36,7 @@
         <a href="research.html">研究札记</a>
         <a href="articles.html">日常文章</a>
         <a href="translation.html">翻译计划</a>
+        <a href="login.html">匿名登录</a>
       </nav>
       <div class="menu-tools">
         <span>界面模式</span>
@@ -47,42 +44,33 @@
           <button type="button" data-theme-choice="light">白天</button>
           <button type="button" data-theme-choice="dark">黑夜</button>
         </div>
-        <a id="loginMenuButton" class="menu-login-button" href="login.html">匿名登录</a>
         <p id="userStatus" class="user-status">未登录</p>
       </div>
     </aside>
 
     <main>
-      <section class="page-hero">
-        <p class="eyebrow">Translation</p>
-        <h1>翻译计划</h1>
-        <p>维护术语、短文、译注和资料线索，后续可接入管理员审核流程。</p>
-      </section>
-
-      <section class="media-section page-media">
-        <div id="pageGallery" class="image-strip" data-gallery="translation"></div>
-      </section>
-
-      <section class="content-section two-column">
-        <div>
-          <div id="contentList" class="post-list" data-source="translation"></div>
-        </div>
-        <aside class="side-stack">
-          <article class="side-panel">
-            <h3>术语池</h3>
-            <p>mauvaise foi、pour-soi、en-soi、absurde、angoisse。</p>
-          </article>
-          <article class="side-panel dark">
-            <h3>后续功能</h3>
-            <p>版本记录、译者署名、审校状态、管理员置顶。</p>
-          </article>
-        </aside>
+      <section class="login-page">
+        <form id="loginForm" class="login-card page-login-card">
+          <p class="eyebrow">Local Login</p>
+          <h1>匿名登录</h1>
+          <p>当前只是前端演示，不连接服务器或数据库。你可以随便填写名字和密码，后续接后端时再替换为真实认证。</p>
+          <label>
+            名字
+            <input id="loginName" name="name" type="text" autocomplete="nickname" required />
+          </label>
+          <label>
+            密码
+            <input id="loginPassword" name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button class="primary-button" type="submit">进入论坛</button>
+          <button id="logoutButton" class="secondary-button" type="button">退出当前登录</button>
+        </form>
       </section>
     </main>
 
     <footer class="site-footer">
       <span>青蓝存在主义论坛</span>
-      <span>Translation</span>
+      <span>Login</span>
     </footer>
 
     <script src="data.js"></script>

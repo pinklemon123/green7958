@@ -10,8 +10,53 @@ const closeComposer = document.querySelector("#closeComposer");
 const composer = document.querySelector("#composer");
 const tabs = document.querySelectorAll(".tab");
 const sortSelect = document.querySelector("#sortSelect");
+const themeButtons = document.querySelectorAll("[data-theme-choice]");
+const loginMenuButton = document.querySelector("#loginMenuButton");
+const loginForm = document.querySelector("#loginForm");
+const userStatus = document.querySelector("#userStatus");
+const loginName = document.querySelector("#loginName");
+const logoutButton = document.querySelector("#logoutButton");
 
 let activeFilter = "all";
+let currentUser = null;
+
+function loadTheme() {
+  const savedTheme = localStorage.getItem("greenparty-theme") || "light";
+  document.documentElement.dataset.theme = savedTheme;
+  themeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.themeChoice === savedTheme);
+  });
+}
+
+function setTheme(theme) {
+  localStorage.setItem("greenparty-theme", theme);
+  document.documentElement.dataset.theme = theme;
+  themeButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.themeChoice === theme);
+  });
+}
+
+function loadUser() {
+  try {
+    currentUser = JSON.parse(localStorage.getItem("greenparty-user"));
+  } catch {
+    currentUser = null;
+  }
+  renderUser();
+}
+
+function renderUser() {
+  if (!loginMenuButton || !userStatus) return;
+  if (currentUser?.name) {
+    loginMenuButton.textContent = "个人登录页";
+    loginMenuButton.setAttribute("href", "login.html");
+    userStatus.textContent = `当前用户：${currentUser.name}`;
+    return;
+  }
+  loginMenuButton.textContent = "匿名登录";
+  loginMenuButton.setAttribute("href", "login.html");
+  userStatus.textContent = "未登录";
+}
 
 function textMatches(post, query) {
   if (!query) return true;
@@ -166,6 +211,30 @@ closeMenu?.addEventListener("click", closeSiteMenu);
 menuOverlay?.addEventListener("click", closeSiteMenu);
 siteMenu?.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeSiteMenu));
 
+themeButtons.forEach((button) => {
+  button.addEventListener("click", () => setTheme(button.dataset.themeChoice));
+});
+
+loginForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const formData = new FormData(loginForm);
+  const name = String(formData.get("name") || "").trim();
+  const password = String(formData.get("password") || "").trim();
+  if (!name || !password) return;
+  currentUser = { name, createdAt: new Date().toISOString() };
+  localStorage.setItem("greenparty-user", JSON.stringify(currentUser));
+  loginForm.reset();
+  renderUser();
+  window.location.href = "index.html";
+});
+
+logoutButton?.addEventListener("click", () => {
+  localStorage.removeItem("greenparty-user");
+  currentUser = null;
+  renderUser();
+  if (loginName) loginName.focus();
+});
+
 composeButton?.addEventListener("click", () => {
   composer?.classList.add("open");
   composer?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -192,9 +261,16 @@ searchInput?.addEventListener("input", () => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") closeSiteMenu();
+  if (event.key === "Escape") {
+    closeSiteMenu();
+  }
 });
 
+loadTheme();
+loadUser();
+if (page === "login") {
+  loginName?.focus();
+}
 setActiveMenu();
 renderHome();
 renderHomeGallery();
