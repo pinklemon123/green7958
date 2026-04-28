@@ -34,15 +34,15 @@ window.siteData = {
         title: "城市夜色里的问题",
         label: "热门讨论",
         image:
-          "https://commons.wikimedia.org/wiki/Special:FilePath/City_street_at_night_(1).jpg?width=1200",
-        source: "National Cancer Institute · Public Domain",
+          "https://commons.wikimedia.org/wiki/Special:FilePath/City-lights-night-street_(24326520255).jpg?width=1200",
+        source: "Wikimedia Commons · CC0",
       },
       {
         title: "公共阅读室",
         label: "公共讨论",
         image:
-          "https://commons.wikimedia.org/wiki/Special:FilePath/Main_(Reading_Room)_(3109281787).jpg?width=1100",
-        source: "NYPL · No known restrictions",
+          "https://commons.wikimedia.org/wiki/Special:FilePath/Delaware_Public_Library_Reading_Room.png?width=1000",
+        source: "Wikimedia Commons · Public Domain",
       },
     ],
     research: [
@@ -55,7 +55,7 @@ window.siteData = {
       {
         title: "旧书细节",
         label: "文本细读",
-        image: "https://commons.wikimedia.org/wiki/Special:FilePath/Old_Books_02.JPG?width=1200",
+        image: "https://commons.wikimedia.org/wiki/Special:FilePath/Old_Books_in_the_library.jpg?width=1200",
         source: "Wikimedia Commons · CC0",
       },
     ],
@@ -64,8 +64,8 @@ window.siteData = {
         title: "街道、灯光与日常性",
         label: "日常现场",
         image:
-          "https://commons.wikimedia.org/wiki/Special:FilePath/City_street_at_night_(3).jpg?width=1200",
-        source: "National Cancer Institute · Public Domain",
+          "https://commons.wikimedia.org/wiki/Special:FilePath/NYC_streetlife_(Unsplash).jpg?width=1200",
+        source: "Wikimedia Commons · CC0",
       },
       {
         title: "夜间城市中心",
@@ -79,7 +79,7 @@ window.siteData = {
       {
         title: "旧书与译注",
         label: "术语整理",
-        image: "https://commons.wikimedia.org/wiki/Special:FilePath/Old_Books_01.JPG?width=1200",
+        image: "https://commons.wikimedia.org/wiki/Special:FilePath/Old_books_in_library.jpg?width=1200",
         source: "Wikimedia Commons · CC0",
       },
       {
