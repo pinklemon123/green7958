@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>后台管理 - 青蓝论坛</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-page="admin">
+    <header class="global-header">
+      <a class="brand" href="index.html" aria-label="青蓝存在主义论坛首页">
+        <span class="brand-mark">管</span>
+        <span>
+          <strong>后台管理</strong>
+          <small>青蓝论坛</small>
+        </span>
+      </a>
+      <div class="header-actions">
+        <a class="primary-button" href="index.html">返回网站</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-hero">
+        <p class="eyebrow">Admin</p>
+        <h1>后台管理平台</h1>
+        <p>管理员唯一账号登录后，可以管理首页/分区图片，删除文章帖子，修改文章基础信息。</p>
+      </section>
+
+      <section class="content-section admin-grid">
+        <form id="adminLoginForm" class="admin-panel">
+          <h2>管理员登录</h2>
+          <p class="form-note">请通过服务器地址访问本页，例如 <strong>http://localhost:3000/admin.html</strong>。直接用 file:// 打开无法连接后台 API。</p>
+          <label>
+            账号
+            <input name="username" type="text" autocomplete="username" value="adminxxx" required />
+          </label>
+          <label>
+            密码
+            <input name="password" type="password" autocomplete="current-password" value="2430350396" required />
+          </label>
+          <button class="primary-button" type="submit">登录后台</button>
+          <p id="adminLoginMessage" class="form-note">登录成功后会显示文章管理和图片管理操作区。</p>
+        </form>
+
+        <section id="adminDashboard" class="admin-dashboard" hidden>
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Posts</p>
+              <h2>文章管理</h2>
+            </div>
+            <button id="adminLogout" class="secondary-button" type="button">退出后台</button>
+          </div>
+          <div id="adminPosts" class="admin-list"></div>
+
+          <div class="section-title lower-title">
+            <div>
+              <p class="eyebrow">Gallery</p>
+              <h2>图片管理</h2>
+            </div>
+            <button id="saveGalleries" class="primary-button" type="button">保存图片</button>
+          </div>
+          <div id="adminGalleries" class="gallery-editor"></div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>青蓝存在主义论坛</span>
+      <span>Admin</span>
+    </footer>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

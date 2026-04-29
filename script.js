@@ -30,6 +30,19 @@ function storageSet(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
+async function loadApiData() {
+  try {
+    const response = await fetch("/api/site-data");
+    if (!response.ok) return;
+    const apiData = await response.json();
+    if (Array.isArray(apiData.posts)) data.posts = apiData.posts;
+    if (apiData.galleries) data.galleries = apiData.galleries;
+    if (apiData.comments) data.comments = apiData.comments;
+  } catch {
+    // File preview or offline mode keeps using data.js and localStorage.
+  }
+}
+
 function getAllPosts() {
   return [...data.posts, ...storageGet("greenparty-posts", [])];
 }
@@ -347,18 +360,10 @@ function renderReactions(post) {
   favoriteButton.textContent = favoriteIds.includes(post.id) ? "已收藏" : "收藏";
 
   likeButton.onclick = () => {
-    const store = storageGet("greenparty-reactions", {});
-    store[post.id] = store[post.id] || { likes: 0, dislikes: 0 };
-    store[post.id].likes += 1;
-    storageSet("greenparty-reactions", store);
-    renderReactions(post);
+    submitReaction(post, "like");
   };
   dislikeButton.onclick = () => {
-    const store = storageGet("greenparty-reactions", {});
-    store[post.id] = store[post.id] || { likes: 0, dislikes: 0 };
-    store[post.id].dislikes += 1;
-    storageSet("greenparty-reactions", store);
-    renderReactions(post);
+    submitReaction(post, "dislike");
   };
   favoriteButton.onclick = () => {
     const ids = storageGet("greenparty-favorites", []);
@@ -366,6 +371,37 @@ function renderReactions(post) {
     storageSet("greenparty-favorites", next);
     renderReactions(post);
   };
+}
+
+async function submitReaction(post, type) {
+  try {
+    const response = await fetch(`/api/posts/${encodeURIComponent(post.id)}/reaction`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type }),
+    });
+    if (response.ok) {
+      const result = await response.json();
+      post.likes = result.likes;
+      post.dislikes = result.dislikes;
+      renderReactions(post);
+      return;
+    }
+  } catch {
+    // Static file preview keeps the local fallback below.
+  }
+  if (type === "like") {
+    const store = storageGet("greenparty-reactions", {});
+    store[post.id] = store[post.id] || { likes: 0, dislikes: 0 };
+    store[post.id].likes += 1;
+    storageSet("greenparty-reactions", store);
+  } else {
+    const store = storageGet("greenparty-reactions", {});
+    store[post.id] = store[post.id] || { likes: 0, dislikes: 0 };
+    store[post.id].dislikes += 1;
+    storageSet("greenparty-reactions", store);
+  }
+  renderReactions(post);
 }
 
 function renderComments(postId) {
@@ -391,12 +427,33 @@ function renderComments(postId) {
 function bindCommentForm() {
   const form = document.querySelector("#commentForm");
   if (!form) return;
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const id = new URLSearchParams(location.search).get("id") || data.posts[0]?.id;
     const text = String(new FormData(form).get("comment") || "").trim();
     if (!text) return;
     const comments = storageGet("greenparty-comments", {});
+    try {
+      const response = await fetch(`/api/posts/${encodeURIComponent(id)}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ author: currentUser?.name || "匿名读者", text }),
+      });
+      if (response.ok) {
+        const result = await response.json();
+        data.comments[id] = data.comments[id] || [];
+        data.comments[id].push({
+          author: result.comment.author,
+          text: result.comment.text,
+          time: "刚刚",
+        });
+        form.reset();
+        renderComments(id);
+        return;
+      }
+    } catch {
+      // Static file preview keeps the local fallback below.
+    }
     comments[id] = comments[id] || [];
     comments[id].push({
       author: currentUser?.name || "匿名读者",
@@ -505,6 +562,20 @@ function bindPublishForm() {
       likes: 0,
       dislikes: 0,
     };
+    try {
+      const response = await fetch("/api/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(post),
+      });
+      if (response.ok) {
+        const saved = await response.json();
+        window.location.href = `post.html?id=${encodeURIComponent(saved.post.id)}`;
+        return;
+      }
+    } catch {
+      // Static file preview keeps the local fallback below.
+    }
     const posts = storageGet("greenparty-posts", []);
     posts.unshift(post);
     storageSet("greenparty-posts", posts);
@@ -575,17 +646,22 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeSiteMenu();
 });
 
-loadTheme();
-loadUser();
-if (page === "login") loginName?.focus();
-setActiveMenu();
-renderHome();
-renderHomeGallery();
-renderPageGallery();
-renderPostList();
-renderContentList();
-renderProfile();
-bindProfileForm();
-renderArticle();
-bindCommentForm();
-bindPublishForm();
+async function init() {
+  loadTheme();
+  loadUser();
+  await loadApiData();
+  if (page === "login") loginName?.focus();
+  setActiveMenu();
+  renderHome();
+  renderHomeGallery();
+  renderPageGallery();
+  renderPostList();
+  renderContentList();
+  renderProfile();
+  bindProfileForm();
+  renderArticle();
+  bindCommentForm();
+  bindPublishForm();
+}
+
+init();
