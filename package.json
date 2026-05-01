@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check script.js && node --check admin.js && node --check data.js"
+    "check": "node --check server.js && node --check script.js && node --check admin.js && node --check data.js && node --check db.js && node --check migrate-mongo.js && node --check models/SiteState.js",
+    "migrate:mongo": "node migrate-mongo.js"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "pg": "^8.13.1"
+    "mongoose": "^8.8.4"
   }
 }

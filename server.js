@@ -14,7 +14,7 @@ const maxBodySize = 8 * 1024 * 1024;
 const adminUser = process.env.ADMIN_USER || "adminxxx";
 const adminPassword = process.env.ADMIN_PASSWORD || "2430350396";
 const adminTokens = new Set();
-let pgClient = null;
+let siteStateModel = null;
 
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
@@ -63,28 +63,21 @@ function normalizeDb(db) {
   };
 }
 
-async function initPostgres() {
-  if (!process.env.DATABASE_URL) return;
-  const { Client } = await import("pg");
-  pgClient = new Client({ connectionString: process.env.DATABASE_URL });
-  await pgClient.connect();
-  await pgClient.query(`
-    CREATE TABLE IF NOT EXISTS app_state (
-      id INTEGER PRIMARY KEY,
-      data JSONB NOT NULL,
-      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `);
-  const result = await pgClient.query("SELECT data FROM app_state WHERE id = 1");
-  if (!result.rowCount) {
-    await pgClient.query("INSERT INTO app_state (id, data) VALUES (1, $1)", [initialDb()]);
+async function initMongo() {
+  if (!process.env.MONGODB_URI) return;
+  const [{ connectMongo }, modelModule] = await Promise.all([import("./db.js"), import("./models/SiteState.js")]);
+  await connectMongo();
+  siteStateModel = modelModule.default;
+  const existing = await siteStateModel.findOne({ key: "main" }).lean();
+  if (!existing) {
+    await siteStateModel.create({ key: "main", data: initialDb() });
   }
 }
 
 async function readDb() {
-  if (pgClient) {
-    const result = await pgClient.query("SELECT data FROM app_state WHERE id = 1");
-    return normalizeDb(result.rows[0]?.data || initialDb());
+  if (siteStateModel) {
+    const state = await siteStateModel.findOne({ key: "main" }).lean();
+    return normalizeDb(state?.data || initialDb());
   }
   if (!fs.existsSync(dbPath)) {
     fs.writeFileSync(dbPath, JSON.stringify(initialDb(), null, 2));
@@ -94,8 +87,12 @@ async function readDb() {
 
 async function writeDb(db) {
   const normalized = normalizeDb(db);
-  if (pgClient) {
-    await pgClient.query("UPDATE app_state SET data = $1, updated_at = NOW() WHERE id = 1", [normalized]);
+  if (siteStateModel) {
+    await siteStateModel.findOneAndUpdate(
+      { key: "main" },
+      { key: "main", data: normalized },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
     return;
   }
   fs.writeFileSync(dbPath, JSON.stringify(normalized, null, 2));
@@ -173,6 +170,19 @@ async function handleApi(req, res) {
       galleries: db.galleries,
       comments: db.comments,
     });
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/search") {
+    const q = String(url.searchParams.get("q") || "").trim().toLowerCase();
+    const posts = q
+      ? db.posts.filter((post) => {
+          const text = `${post.title || ""} ${post.excerpt || ""} ${post.content || ""} ${post.author || ""} ${
+            post.type || ""
+          }`.toLowerCase();
+          return text.includes(q);
+        })
+      : [];
+    return sendJson(res, 200, { posts: posts.slice(0, 20) });
   }
 
   if (req.method === "POST" && url.pathname === "/api/admin/login") {
@@ -333,10 +343,10 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-await initPostgres();
+await initMongo();
 
 server.listen(port, () => {
-  const storage = pgClient ? "PostgreSQL" : `JSON file (${dbPath})`;
+  const storage = siteStateModel ? "MongoDB" : `JSON file (${dbPath})`;
   console.log(`Greenparty forum server running at http://localhost:${port}`);
   console.log(`Storage: ${storage}`);
 });

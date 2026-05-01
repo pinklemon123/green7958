@@ -1,13 +1,12 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: greenparty-postgres
+  mongo:
+    image: mongo:7
+    container_name: greenparty-mongo
     environment:
-      POSTGRES_USER: greenparty
-      POSTGRES_PASSWORD: greenparty-change-this-password
-      POSTGRES_DB: greenparty
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: "123456"
     volumes:
-      - greenparty-postgres:/var/lib/postgresql/data
+      - greenparty-mongo:/data/db
     restart: unless-stopped
 
   greenparty-forum:
@@ -18,15 +17,15 @@ services:
     environment:
       PORT: "3000"
       DB_FILE: "/data/db.json"
-      DATABASE_URL: "postgres://greenparty:greenparty-change-this-password@postgres:5432/greenparty"
+      MONGODB_URI: "mongodb://admin:123456@mongo:27017/greenparty?authSource=admin"
       ADMIN_USER: "adminxxx"
       ADMIN_PASSWORD: "2430350396"
     volumes:
       - greenparty-data:/data
     depends_on:
-      - postgres
+      - mongo
     restart: unless-stopped
 
 volumes:
   greenparty-data:
-  greenparty-postgres:
+  greenparty-mongo:

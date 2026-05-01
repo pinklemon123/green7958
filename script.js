@@ -17,6 +17,7 @@ const maxFileSize = 5 * 1024 * 1024;
 
 let activeFilter = "all";
 let currentUser = null;
+let searchPanel = null;
 
 function storageGet(key, fallback) {
   try {
@@ -373,6 +374,58 @@ function renderReactions(post) {
   };
 }
 
+function ensureSearchPanel() {
+  if (!searchInput || searchPanel) return searchPanel;
+  searchPanel = document.createElement("div");
+  searchPanel.id = "searchPanel";
+  searchPanel.className = "search-panel";
+  searchPanel.hidden = true;
+  searchInput.closest(".header-search")?.appendChild(searchPanel);
+  return searchPanel;
+}
+
+async function runSearch() {
+  const panel = ensureSearchPanel();
+  if (!searchInput || !panel) return;
+  const query = searchInput.value.trim();
+  if (!query) {
+    panel.hidden = true;
+    panel.innerHTML = "";
+    return;
+  }
+
+  let results = [];
+  try {
+    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    if (response.ok) {
+      const payload = await response.json();
+      results = payload.posts || [];
+    }
+  } catch {
+    results = getAllPosts().filter((post) => textMatches(post, query)).slice(0, 8);
+  }
+
+  if (!results.length) {
+    panel.hidden = false;
+    panel.innerHTML = '<div class="search-empty">没有找到相关内容</div>';
+    return;
+  }
+
+  panel.hidden = false;
+  panel.innerHTML = results
+    .slice(0, 8)
+    .map(
+      (post) => `
+        <a class="search-result" href="post.html?id=${encodeURIComponent(post.id)}">
+          <span>${post.type || getCategoryLabel(post.category)}</span>
+          <strong>${post.title}</strong>
+          <small>${post.author || "未知作者"}</small>
+        </a>
+      `,
+    )
+    .join("");
+}
+
 async function submitReaction(post, type) {
   try {
     const response = await fetch(`/api/posts/${encodeURIComponent(post.id)}/reaction`, {
@@ -640,6 +693,15 @@ searchInput?.addEventListener("input", () => {
   renderHome();
   renderPostList();
   renderContentList();
+  runSearch();
+});
+
+searchInput?.addEventListener("focus", runSearch);
+document.addEventListener("click", (event) => {
+  if (!searchPanel || !searchInput) return;
+  if (!searchPanel.contains(event.target) && event.target !== searchInput) {
+    searchPanel.hidden = true;
+  }
 });
 
 document.addEventListener("keydown", (event) => {
