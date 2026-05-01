@@ -1,117 +1,179 @@
-# 青蓝论坛
+```markdown
+# 青蓝论坛 Android App
 
-一个轻量论坛/文章站原型，包含主页、讨论广场、研究札记、日常文章、翻译计划、登录页、个人中心、发布页、文章阅读页和后台管理页。
+青蓝论坛 App 是 `青蓝存在主义论坛` 的 Android 客户端，用于连接服务器 API，与网页端共享同一套 MongoDB 数据。
 
-当前版本已经支持 MongoDB。前端页面不用改，后端会优先使用 `MONGODB_URI` 连接 MongoDB；如果没有配置 MongoDB，则回退到 `db.json`。
+App 端不直接连接 MongoDB，而是通过网站后端接口访问数据，避免数据库账号密码暴露在 APK 中。
 
-## 本地运行
-
-```bash
-npm install
-npm start
-```
-
-访问：
+## 当前服务器
 
 ```text
-http://localhost:3000
+IPv4: 216.128.145.106
+IPv6: 2001:19f0:5c00:4465:5400:06ff:fe1e:029e
 ```
 
-后台入口：
+默认 API 地址：
 
 ```text
-http://localhost:3000/admin.html
+http://216.128.145.106
 ```
+
+网页端：
+
+```text
+http://216.128.145.106/
+```
+
+网页后台：
+
+```text
+http://216.128.145.106/admin.html
+```
+
+## 主要功能
+
+- 主页内容流
+- 图片轮播块
+- 分区浏览
+  - 讨论广场
+  - 研究札记
+  - 日常文章
+  - 翻译计划
+- 发布文章 / 帖子
+- 选择封面图片
+- 添加 3MB 以下附件
+- 文章详情页
+- 点赞
+- 踩
+- 评论
+- 收藏
+- 个人中心
+- 上传头像
+- 编辑个签
+- 白天 / 黑夜模式
+- 隐藏管理员入口
+
+## 隐藏后台入口
+
+在 App 主页左上角连续点击 `存` 字 7 次，可以进入隐藏后台登录页。
 
 管理员账号：
 
 ```text
-账号：adminxxx
-密码：2430350396
+adminxxx
 ```
 
-检查脚本：
-
-```bash
-npm run check
-```
-
-## 一键 Docker + MongoDB 部署
-
-服务器装好 Docker 后，在项目目录执行：
-
-```bash
-docker compose up -d --build
-```
-
-它会启动两个容器：
-
-- `greenparty-forum`：Node 网站和 API
-- `greenparty-mongo`：MongoDB 数据库
-
-访问：
+管理员密码：
 
 ```text
-http://服务器IP:3000
+2430350396
 ```
 
-后台：
+后台当前支持：
 
-```text
-http://服务器IP:3000/admin.html
-```
+- 查看帖子 / 文章
+- 删除内容
+- 修改展示图片
 
-## MongoDB 配置
+## 与服务器共享数据库
 
-Docker Compose 默认连接串：
-
-```text
-MONGODB_URI=mongodb://admin:123456@mongo:27017/greenparty?authSource=admin
-```
-
-MongoDB 数据保存在 Docker 卷：
+服务器当前使用 MongoDB：
 
 ```text
 greenparty-mongo
 ```
 
-## 从 db.json 迁移到 MongoDB
+网站容器：
 
-如果你服务器上已有 `db.json`，可以在配置好 `MONGODB_URI` 后运行：
-
-```bash
-npm run migrate:mongo
+```text
+green7958
 ```
 
-也可以指定数据源：
+服务器日志已确认：
 
-```bash
-node migrate-mongo.js /path/to/db.json
+```text
+MongoDB connected
+Storage: MongoDB
 ```
 
-迁移脚本会把整个站点状态导入 MongoDB 的 `SiteState/main` 文档。
+App 发布内容后，会通过接口写入服务器 MongoDB，网页端和 App 端会读取同一份数据。
 
-## 当前后端接口
+主要接口：
 
-- `GET /api/site-data`
-- `POST /api/login`
-- `GET /api/posts`
-- `POST /api/posts`
-- `GET /api/posts/:id`
-- `POST /api/posts/:id/reaction`
-- `POST /api/posts/:id/comments`
-- `POST /api/users/:id/favorites`
-- `POST /api/admin/login`
-- `GET /api/admin/dashboard`
-- `PUT /api/admin/posts/:id`
-- `DELETE /api/admin/posts/:id`
-- `PUT /api/admin/galleries`
+```text
+GET  /api/site-data
+GET  /api/posts
+POST /api/posts
+GET  /api/posts/:id
+POST /api/posts/:id/comments
+POST /api/posts/:id/reaction
+POST /api/admin/login
+GET  /api/admin/dashboard
+PUT  /api/admin/posts/:id
+DELETE /api/admin/posts/:id
+```
 
-## 正式上线前建议补齐
+## 本地开发
 
-- 真实用户注册、密码哈希、登录 token
-- 文章审核状态：草稿、待审、已发布、驳回
-- 管理员权限分级和操作日志
-- 图片和附件上传到对象存储
-- 评论审核、举报、删除
-- HTTPS、域名、反向代理、日志和备份
+进入 Flutter 项目目录：
+
+```powershell
+cd F:\creat\greenlab\flutter_application_1
+```
+
+安装依赖：
+
+```powershell
+flutter pub get
+```
+
+检查代码：
+
+```powershell
+flutter analyze
+```
+
+运行到浏览器或设备：
+
+```powershell
+flutter run
+```
+
+构建 Android APK：
+
+```powershell
+flutter build apk --release
+```
+
+默认连接：
+
+```text
+http://216.128.145.106
+```
+
+## 自定义 API 地址
+
+如果服务器地址变化，可以构建时指定：
+
+```powershell
+flutter build apk --release --dart-define=QINGLAN_API_BASE_URL=http://你的服务器IP
+```
+
+IPv6 地址需要加方括号：
+
+```powershell
+flutter build apk --release --dart-define=QINGLAN_API_BASE_URL=http://[2001:19f0:5c00:4465:5400:06ff:fe1e:029e]
+```
+
+## 注意事项
+
+当前服务器没有单独的文件上传接口，App 会把封面图和 3MB 以下附件转换成 `dataUrl` 后通过 JSON 提交到 `/api/posts`，再存入 MongoDB。
+
+这个方式适合测试和小文件使用。后续如果附件或图片变多，建议给服务器增加独立上传接口，例如：
+
+```text
+POST /api/upload
+```
+
+然后把文件存到服务器目录、对象存储或 CDN，只在 MongoDB 中保存文件 URL。
+```
